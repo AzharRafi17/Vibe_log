@@ -1,0 +1,286 @@
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { Plus, Sparkles, TrendingUp, Heart } from "lucide-react"
+
+
+
+import AddAffirmationModal from "./AddAffirmationModal"
+import EditAffirmationModal from "./EditAffirmationModal"
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog"
+import VibeList from "./VibeList"
+import MoodChart from "./MoodChart"
+
+import { 
+  moodConfig, 
+  getLatestMoodConfig, 
+  calculateMoodStats, 
+} from "./utils" 
+import type { 
+  Affirmation,
+  MoodKey
+} from "./utils" 
+
+const API_BASE = '/api/vibes';
+
+const lightMoodConfig = {
+    joyful: 'from-amber-100 to-yellow-200',
+    grateful: 'from-rose-100 to-pink-200',
+    calm: 'from-sky-100 to-blue-200',
+    energized: 'from-lime-100 to-green-200',
+    hopeful: 'from-violet-100 to-purple-200',
+    default: 'from-white to-gray-50' 
+}
+
+export default function App() {
+  const [affirmations, setAffirmations] = useState<Affirmation[]>([])
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editingAffirmation, setEditingAffirmation] = useState<Affirmation | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const fetchAffirmations = useCallback(async () => {
+    try {
+      setLoading(true)
+      
+      const response = await fetch(API_BASE); 
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch data via proxy.');
+      }
+      
+      const data = await response.json();
+      
+      const formattedData: Affirmation[] = data.map((item: any) => {
+        const safeRating = item.mood_rating ?? 3;
+        
+        return {
+            id: item.id,
+            text: item.affirmation_text,
+            mood: (item.mood_type as MoodKey) ?? 'calm', 
+            rating: safeRating, 
+            createdAt: new Date(item.created_at),
+        };
+      })
+      
+      setAffirmations(formattedData)
+    } catch (error) {
+      console.error('Failed to fetch affirmations:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAffirmations()
+  }, [fetchAffirmations])
+
+  const handleAddAffirmation = async (text: string, mood: MoodKey, timestamp: Date, rating: number) => {
+    try {
+      const response = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          mood,
+          rating,
+          timestamp: timestamp.toISOString(), 
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error adding vibe via proxy.');
+      }
+      
+      setIsAddModalOpen(false)
+      await fetchAffirmations() 
+    } catch (error) {
+      console.error('Failed to add affirmation:', error)
+    }
+  }
+
+  const handleUpdateAffirmation = async (id: string, text: string, mood: MoodKey, timestamp: Date, rating: number) => {
+    try {
+      const response = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          mood,
+          rating,
+          timestamp: timestamp.toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error updating vibe via proxy.');
+      }
+      
+      setEditingAffirmation(null)
+      await fetchAffirmations() 
+    } catch (error) {
+      console.error('Failed to update affirmation:', error)
+    }
+  }
+
+  const handleDeleteAffirmation = async (id: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error deleting vibe via proxy.');
+      }
+      
+      setDeleteId(null)
+      await fetchAffirmations() 
+    } catch (error) {
+      console.error('Failed to delete affirmation:', error)
+    }
+  }
+
+  const latestMoodConfig = getLatestMoodConfig(affirmations, moodConfig)
+  const moodStats = calculateMoodStats(affirmations)
+  const latestMood = affirmations[0]?.mood || "calm"
+  const latestRating = affirmations[0]?.rating ?? 3 
+
+  const hasVibes = affirmations.length > 0;
+  
+  const mainGradientClass = hasVibes 
+      ? lightMoodConfig[latestMood as keyof typeof lightMoodConfig] 
+      : lightMoodConfig.default;
+
+  const headerTextColor = hasVibes ? 'text-gray-900' : 'text-gray-900';
+  const subTextColor = hasVibes ? 'text-gray-700' : 'text-gray-600';
+  const backdropClass = hasVibes ? 'backdrop-blur-[20px] bg-white/50' : 'bg-white';
+  const cardBgClass = hasVibes ? 'bg-white/80 border border-gray-200' : 'bg-white border border-gray-200';
+  const cardTextColor = 'text-gray-800';
+  const cardTitleColor = 'text-gray-600';
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-gray-700 to-gray-900 transition-all duration-1000">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-6xl mb-4 animate-bounce text-white">✨</div>
+            <p className="text-white text-xl font-semibold">Loading your vibes...</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className={`min-h-screen bg-gradient-to-br ${mainGradientClass} transition-all duration-1000`}>
+      <div className={`min-h-screen ${backdropClass}`}>
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+          
+          <div className="mb-10 flex items-center justify-between">
+            <div>
+              <h1 className={`text-5xl font-black mb-2 drop-shadow-sm flex items-center gap-3 ${headerTextColor}`}>
+                <Sparkles className="w-10 h-10" />
+                Daily Vibes
+              </h1>
+              <p className={`text-lg font-medium ${subTextColor}`}>Track your mood, celebrate your journey</p>
+            </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-4 rounded-2xl font-bold shadow-xl hover:shadow-amber-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Vibe
+            </button>
+          </div>
+    
+          {hasVibes ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              
+              <div className={`rounded-3xl p-6 shadow-xl ${cardBgClass}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-semibold mb-1 ${cardTitleColor}`}>Total Entries</p>
+                    <p className={`text-4xl font-black ${cardTextColor}`}>{affirmations.length}</p>
+                  </div>
+                  <Heart className="w-12 h-12 fill-red-500 text-red-500" />
+                </div>
+              </div>
+
+              <div className={`rounded-3xl p-6 shadow-xl ${cardBgClass}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-semibold mb-1 ${cardTitleColor}`}>Current Mood</p>
+                    <p className={`text-2xl font-bold ${cardTextColor} flex items-center gap-2`}>
+                      <span className="text-3xl">{latestMoodConfig.icon}</span>
+                      {latestMoodConfig.label}
+                    </p>
+                    <p className={`text-sm mt-2 ${cardTitleColor}`}>
+                       Rating: {latestRating}/5
+                    </p>
+                  </div>
+                  <TrendingUp className="w-12 h-12 text-emerald-500" />
+                </div>
+              </div>
+              
+              <div className={`rounded-3xl p-6 shadow-xl col-span-1 md:col-span-2 ${cardBgClass}`}>
+                <p className={`font-semibold mb-3 ${cardTitleColor}`}>Mood Distribution</p>
+                <MoodChart moodStats={moodStats} moodConfig={moodConfig} />
+              </div>
+            </div>
+          ) : (
+            <div className={`flex flex-col items-center justify-center py-20 text-center rounded-3xl bg-gradient-to-br ${lightMoodConfig.default} shadow-lg`}>
+              <div className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mb-6 shadow-md">
+                <Sparkles className="w-12 h-12 text-purple-600" />
+              </div>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">No vibes yet!</h2>
+              <p className="text-gray-700 text-lg mb-8 max-w-md">
+                Start your journey by adding your first affirmation and set the mood for your day.
+              </p>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-purple-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Add Your First Vibe
+              </button>
+            </div>
+          )}
+
+          {hasVibes && (
+              <VibeList 
+                  affirmations={affirmations}
+                  onEdit={(aff) => setEditingAffirmation(aff)}
+                  onDelete={(id) => setDeleteId(id)}
+              />
+          )}
+          
+        </div>
+      </div>
+
+      <AddAffirmationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleAddAffirmation}
+      />
+
+      {editingAffirmation && (
+        <EditAffirmationModal
+          affirmation={editingAffirmation}
+          onClose={() => setEditingAffirmation(null)}
+          onUpdate={handleUpdateAffirmation}
+        />
+      )}
+
+      {deleteId && (
+        <DeleteConfirmationDialog
+          onDelete={() => handleDeleteAffirmation(deleteId)}
+          onCancel={() => setDeleteId(null)}
+        />
+      )}
+    </main>
+  )
+}
