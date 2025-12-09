@@ -87,4 +87,6 @@ app.delete('/:id', (req, res) => {
     handleDatabaseOperation(req, res, 'DELETE', payload);
 });
 
-module.exports = app;
+module.exports = (req, res) => {
+    app(req, res);
+};
