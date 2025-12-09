@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/vibes(.*)",
-      "destination": "/api/vibes.js"
+      "destination": "/api/vibes.mjs"
     },
     {
       "source": "/(.*)",

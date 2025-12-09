@@ -15,7 +15,8 @@ const chartColorMap: Record<MoodKey, string> = {
     grateful: '#f472b6', 
     calm: '#38bdf8', 
     energized: '#4ade80',
-    hopeful: '#a78bfa' 
+    hopeful: '#a78bfa',
+    angry: '#DC2626',
 };
 
 export default function MoodChart({ moodStats, moodConfig }: MoodChartProps) {
