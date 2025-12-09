@@ -1,12 +1,11 @@
-const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
+import express from 'express';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 app.use(express.json());
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+const supabaseUrl = process.env.SUPABASE_URL; 
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
@@ -40,7 +39,6 @@ const handleDatabaseOperation = async (req, res, operation, payload = null) => {
             return res.status(500).json({ error: error.message });
         }
 
-      
         res.status(200).json(data);
     } catch (e) {
         console.error('Serverless Proxy Error:', e);
@@ -87,6 +85,6 @@ app.delete('/:id', (req, res) => {
     handleDatabaseOperation(req, res, 'DELETE', payload);
 });
 
-module.exports = (req, res) => {
+export default (req, res) => {
     app(req, res);
 };
