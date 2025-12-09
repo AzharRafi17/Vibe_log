@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Sparkles, TrendingUp, Heart } from "lucide-react"
+import { Sparkles, TrendingUp, Heart } from "lucide-react"
 
-
+import Header from "./Header"; 
+import Footer from "./Footer"; 
 
 import AddAffirmationModal from "./AddAffirmationModal"
 import EditAffirmationModal from "./EditAffirmationModal"
@@ -38,6 +39,7 @@ export default function App() {
   const [editingAffirmation, setEditingAffirmation] = useState<Affirmation | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
 
   const fetchAffirmations = useCallback(async () => {
     try {
@@ -90,8 +92,15 @@ export default function App() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error adding vibe via proxy.');
+        let errorMessage = 'Error adding vibe via proxy.';
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+             const errorData = await response.json();
+             errorMessage = errorData.error || errorMessage;
+        } else {
+             errorMessage = await response.text();
+        }
+        throw new Error(errorMessage);
       }
       
       setIsAddModalOpen(false)
@@ -156,7 +165,6 @@ export default function App() {
       : lightMoodConfig.default;
 
   const headerTextColor = hasVibes ? 'text-gray-900' : 'text-gray-900';
-  const subTextColor = hasVibes ? 'text-gray-700' : 'text-gray-600';
   const backdropClass = hasVibes ? 'backdrop-blur-[20px] bg-white/50' : 'bg-white';
   const cardBgClass = hasVibes ? 'bg-white/80 border border-gray-200' : 'bg-white border border-gray-200';
   const cardTextColor = 'text-gray-800';
@@ -176,30 +184,25 @@ export default function App() {
   }
 
   return (
-    <main className={`min-h-screen bg-gradient-to-br ${mainGradientClass} transition-all duration-1000`}>
-      <div className={`min-h-screen ${backdropClass}`}>
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className={`min-h-screen bg-gradient-to-br ${mainGradientClass} transition-all duration-1000`}>
+      
+      <Header 
+          onAddVibe={() => setIsAddModalOpen(true)}
+          headerTextColor={headerTextColor}
+      />
+
+      <main className={`min-h-screen ${backdropClass} pt-8`}> 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* 💡 REMOVED the old header div */}
+          {/* REMOVED: 
           <div className="mb-10 flex items-center justify-between">
-            <div>
-              <h1 className={`text-5xl font-black mb-2 drop-shadow-sm flex items-center gap-3 ${headerTextColor}`}>
-                <Sparkles className="w-10 h-10" />
-                Daily Vibes
-              </h1>
-              <p className={`text-lg font-medium ${subTextColor}`}>Track your mood, celebrate your journey</p>
-            </div>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-4 rounded-2xl font-bold shadow-xl hover:shadow-amber-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Vibe
-            </button>
-          </div>
+            ... (old title and button)
+          </div> 
+          */}
     
           {hasVibes ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              
               <div className={`rounded-3xl p-6 shadow-xl ${cardBgClass}`}>
                 <div className="flex items-center justify-between">
                   <div>
@@ -240,13 +243,14 @@ export default function App() {
               <p className="text-gray-700 text-lg mb-8 max-w-md">
                 Start your journey by adding your first affirmation and set the mood for your day.
               </p>
-              <button
+              {/* The button here is redundant since the Header button is always visible */}
+              {/* <button
                 onClick={() => setIsAddModalOpen(true)}
                 className="bg-purple-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Add Your First Vibe
-              </button>
+              </button> */}
             </div>
           )}
 
@@ -259,8 +263,10 @@ export default function App() {
           )}
           
         </div>
-      </div>
+      </main>
 
+      <Footer />
+      
       <AddAffirmationModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -281,6 +287,6 @@ export default function App() {
           onCancel={() => setDeleteId(null)}
         />
       )}
-    </main>
+    </div>
   )
 }
