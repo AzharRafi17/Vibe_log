@@ -192,66 +192,51 @@ export default function App() {
           headerTextColor={headerTextColor}
       />
 
-      <main className={`min-h-screen ${backdropClass} pt-8`}> 
+      <main className={`${backdropClass} pt-8 pb-16`}> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* 💡 REMOVED the old header div */}
-          {/* REMOVED: 
-          <div className="mb-10 flex items-center justify-between">
-            ... (old title and button)
-          </div> 
-          */}
-    
           {hasVibes ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className={`rounded-3xl p-6 shadow-xl ${cardBgClass}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+              <div className={`rounded-3xl p-4 sm:p-6 shadow-xl ${cardBgClass}`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={`font-semibold mb-1 ${cardTitleColor}`}>Total Entries</p>
-                    <p className={`text-4xl font-black ${cardTextColor}`}>{affirmations.length}</p>
+                    <p className={`font-semibold mb-1 text-sm sm:text-base ${cardTitleColor}`}>Total Entries</p>
+                    <p className={`text-3xl sm:text-4xl font-black ${cardTextColor}`}>{affirmations.length}</p>
                   </div>
-                  <Heart className="w-12 h-12 fill-red-500 text-red-500" />
+                  <Heart className="w-10 h-10 sm:w-12 sm:h-12 fill-red-500 text-red-500" />
                 </div>
               </div>
 
-              <div className={`rounded-3xl p-6 shadow-xl ${cardBgClass}`}>
+              <div className={`rounded-3xl p-4 sm:p-6 shadow-xl ${cardBgClass}`}>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`font-semibold mb-1 ${cardTitleColor}`}>Current Mood</p>
-                    <p className={`text-2xl font-bold ${cardTextColor} flex items-center gap-2`}>
-                      <span className="text-3xl">{latestMoodConfig.icon}</span>
-                      {latestMoodConfig.label}
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold mb-1 text-sm sm:text-base ${cardTitleColor}`}>Current Mood</p>
+                    <p className={`text-xl sm:text-2xl font-bold ${cardTextColor} flex items-center gap-2`}>
+                      <span className="text-2xl sm:text-3xl">{latestMoodConfig.icon}</span>
+                      <span className="truncate">{latestMoodConfig.label}</span>
                     </p>
-                    <p className={`text-sm mt-2 ${cardTitleColor}`}>
+                    <p className={`text-xs sm:text-sm mt-2 ${cardTitleColor}`}>
                        Rating: {latestRating}/5
                     </p>
                   </div>
-                  <TrendingUp className="w-12 h-12 text-emerald-500" />
+                  <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-500 flex-shrink-0" />
                 </div>
               </div>
               
-              <div className={`rounded-3xl p-6 shadow-xl col-span-1 md:col-span-2 ${cardBgClass}`}>
-                <p className={`font-semibold mb-3 ${cardTitleColor}`}>Mood Distribution</p>
+              <div className={`rounded-3xl p-4 sm:p-6 shadow-xl col-span-1 sm:col-span-2 ${cardBgClass}`}>
+                <p className={`font-semibold mb-3 text-sm sm:text-base ${cardTitleColor}`}>Mood Distribution</p>
                 <MoodChart moodStats={moodStats} moodConfig={moodConfig} />
               </div>
             </div>
           ) : (
-            <div className={`flex flex-col items-center justify-center py-20 text-center rounded-3xl bg-gradient-to-br ${lightMoodConfig.default} shadow-lg`}>
-              <div className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mb-6 shadow-md">
-                <Sparkles className="w-12 h-12 text-purple-600" />
+            <div className={`flex flex-col items-center justify-center py-12 sm:py-20 text-center rounded-3xl bg-gradient-to-br ${lightMoodConfig.default} shadow-lg mx-2 sm:mx-0`}>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-purple-100 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-md">
+                <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-purple-600" />
               </div>
-              <h2 className="text-4xl font-black text-gray-900 mb-4">No vibes yet!</h2>
-              <p className="text-gray-700 text-lg mb-8 max-w-md">
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3 sm:mb-4 px-4">No vibes yet!</h2>
+              <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 max-w-md px-4">
                 Start your journey by adding your first affirmation and set the mood for your day.
               </p>
-              {/* The button here is redundant since the Header button is always visible */}
-              {/* <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-purple-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add Your First Vibe
-              </button> */}
             </div>
           )}
 
