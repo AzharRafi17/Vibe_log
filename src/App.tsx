@@ -30,7 +30,8 @@ const lightMoodConfig = {
     calm: 'from-sky-100 to-blue-200',
     energized: 'from-lime-100 to-green-200',
     hopeful: 'from-violet-100 to-purple-200',
-    default: 'from-white to-gray-50' 
+    default: 'from-white to-gray-50', 
+    angry: 'from-red-200 to-rose-300',
 }
 
 export default function App() {

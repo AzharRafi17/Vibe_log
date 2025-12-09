@@ -1,7 +1,7 @@
 export interface Affirmation {
   id: string;
   text: string;
-  mood: "joyful" | "grateful" | "calm" | "energized" | "hopeful"; 
+  mood: "joyful" | "grateful" | "calm" | "energized" | "hopeful"|"angry";
   rating?: number; 
   createdAt: Date;
 
@@ -48,6 +48,12 @@ export const moodConfig: Record<MoodKey, MoodConfigEntry> = {
     label: "Hopeful",
     shadow: "shadow-purple-500/50"
   },
+  angry: {
+        icon: '😡', 
+        label: 'Angry',
+        gradient: 'from-red-600 to-red-800', 
+        shadow: 'shadow-red-600/50',
+    },
 }
 
 export const mapRatingToMood = (rating: number): MoodKey => {
