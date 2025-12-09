@@ -47,11 +47,11 @@ const handleDatabaseOperation = async (req, res, operation, payload = null) => {
 };
 
 
-app.get('/', (req, res) => {
+app.get('/api/vibes', (req, res) => {
     handleDatabaseOperation(req, res, 'READ');
 });
 
-app.post('/', (req, res) => {
+app.post('/api/vibes', (req, res) => {
     const { text, mood, rating, timestamp } = req.body;
     const payload = {
         data: {
@@ -64,7 +64,7 @@ app.post('/', (req, res) => {
     handleDatabaseOperation(req, res, 'CREATE', payload);
 });
 
-app.put('/:id', (req, res) => {
+app.put('/api/vibes/:id', (req, res) => {
     const { id } = req.params;
     const { text, mood, rating, timestamp } = req.body;
     const payload = {
@@ -79,7 +79,7 @@ app.put('/:id', (req, res) => {
     handleDatabaseOperation(req, res, 'UPDATE', payload);
 });
 
-app.delete('/:id', (req, res) => {
+app.delete('/api/vibes/:id', (req, res) => {
     const { id } = req.params;
     const payload = { id: id };
     handleDatabaseOperation(req, res, 'DELETE', payload);
