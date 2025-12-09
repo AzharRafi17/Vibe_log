@@ -1,8 +1,12 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/vibes(.*)",
-      "dest": "/api/vibes.js"
+      "source": "/api/vibes(.*)",
+      "destination": "/api/vibes.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
